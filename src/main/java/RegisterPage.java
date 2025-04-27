@@ -8,20 +8,24 @@ public class RegisterPage extends BasePage {
 	By confirmPasswordLocator = By.id("confirmPassword");
 	By emailLocator = By.id("email");
 	By submitBtnLocator = By.className("btn-primary");
+	By alertLocator = By.xpath("//div[contains(@class,'toastify-center toastify-top')]");
 
 	WebElement usernameField = find(usernameLocator);
 	WebElement passwordField = find(passwordLocator);
 	WebElement confirmPasswordField = find(confirmPasswordLocator);
 	WebElement emailField = find(emailLocator);
 	WebElement submitBtn = find(submitBtnLocator);
-	public RegisterPage(WebDriver driver){
+	WebElement alert = find(alertLocator);
+
+	public RegisterPage(WebDriver driver) {
 		super(driver);
 	}
-	public void register(String username,String password,String confirmPassword,String email){
-			usernameField.sendKeys(username);
-			passwordField.sendKeys(password);
-			confirmPasswordField.sendKeys(confirmPassword);
-			emailField.sendKeys(email);
-			submitBtn.click();
+
+	public void register(String username, String password, String confirmPassword, String email) {
+		usernameField.sendKeys(username);
+		passwordField.sendKeys(password);
+		confirmPasswordField.sendKeys(confirmPassword);
+		emailField.sendKeys(email);
+		submitBtn.click();
 	}
 }
