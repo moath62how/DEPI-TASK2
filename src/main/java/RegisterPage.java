@@ -1,36 +1,45 @@
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.NoSuchElementException; // <-- ADD THIS IMPORT
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 public class RegisterPage extends BasePage {
-	By usernameLocator = By.id("username");
-	By passwordLocator = By.id("password");
-	By confirmPasswordLocator = By.id("confirmPassword");
-	By emailLocator = By.id("email");
-	By submitBtnLocator = By.className("btn-primary");
-	By alertLocator = By.xpath("//div[contains(@class,'toastify-center toastify-top')]");
-
-	WebElement usernameField = find(usernameLocator);
-	WebElement passwordField = find(passwordLocator);
-	WebElement confirmPasswordField = find(confirmPasswordLocator);
-	WebElement emailField = find(emailLocator);
-	WebElement submitBtn = find(submitBtnLocator);
-	WebElement alert = find(alertLocator);
+	private final By usernameLocator = By.id("username");
+	private final By passwordLocator = By.id("password");
+	private final By confirmPasswordLocator = By.id("confirmPassword");
+	private final By emailLocator = By.id("email");
+	private final By submitBtnLocator = By.className("btn-primary");
+	private final By alertLocator = By.xpath("//div[contains(@class,'toastify-center toastify-top')]");
 
 	public RegisterPage(WebDriver driver) {
 		super(driver);
 	}
-	public String getAlertText(){
-		return alert.getText();
+
+	public void register(String username, String email, String password, String confirmPassword) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(usernameLocator)).sendKeys(username);
+		find(emailLocator).sendKeys(email);
+		find(passwordLocator).sendKeys(password);
+		find(confirmPasswordLocator).sendKeys(confirmPassword);
+		wait.until(ExpectedConditions.elementToBeClickable(submitBtnLocator)).click();
 	}
-	public boolean isAlertVisible(){
-		return alert.isDisplayed();
+
+	public String getAlertText() {
+		try {
+			return find(alertLocator).getText();
+		} catch (NoSuchElementException e) {
+			return "";
+		}
 	}
-	public void register(String username, String password, String confirmPassword, String email) {
-		usernameField.sendKeys(username);
-		passwordField.sendKeys(password);
-		confirmPasswordField.sendKeys(confirmPassword);
-		emailField.sendKeys(email);
-		submitBtn.click();
+
+	public boolean isAlertVisible() {
+		try {
+			return find(alertLocator).isDisplayed();
+		} catch (NoSuchElementException e) {
+			return false;
+		}
 	}
 }
