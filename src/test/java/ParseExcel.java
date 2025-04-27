@@ -1,65 +1,60 @@
-package org.example;
-
 import org.apache.poi.ss.usermodel.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.io.*;
+import java.util.*;
 
 public class ParseExcel {
-	public static Object[][] readData(String fileName) throws IOException {
-		try (InputStream file = ParseExcel.class.getClassLoader().getResourceAsStream(fileName)) {
-			if (file == null) {
-				throw new IOException("Excel file not found: " + fileName);
+	private static Object[][] readAllData(String path) throws IOException {
+		FileInputStream file = new FileInputStream(new File(path));
+		Workbook workbook = WorkbookFactory.create(file);
+		Sheet sheet = workbook.getSheet("Sheet1");
+
+		int rowCount = sheet.getPhysicalNumberOfRows();
+		//skip the res that's why -1
+		int colCount = sheet.getRow(0).getPhysicalNumberOfCells() ;
+		System.out.println(colCount);
+
+		Object[][] data = new Object[rowCount - 1][colCount];
+
+		for (int i = 1; i < rowCount; i++) {
+			Row row = sheet.getRow(i);
+			for (int j = 0; j < colCount; j++) {
+				Cell cell = row.getCell(j);
+				data[i - 1][j] = cell == null ?  "" : cell.getStringCellValue();
 			}
-
-			Workbook workbook = WorkbookFactory.create(file);
-			Sheet sheet = workbook.getSheetAt(0);
-
-			// Dynamically determine rows and columns
-			int startRow = 1; // Skip header row
-			int endRow = sheet.getLastRowNum();
-			int colCount = sheet.getRow(0).getLastCellNum(); // Header column count
-
-			List<Object[]> dataList = new ArrayList<>();
-
-			for (int i = startRow; i <= endRow; i++) {
-				Row row = sheet.getRow(i);
-				if (row == null) continue; // Skip empty rows
-
-				Object[] rowData = new Object[colCount];
-				boolean isEmptyRow = true;
-
-				for (int j = 0; j < colCount; j++) {
-					Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-					rowData[j] = getCellValue(cell);
-					if (rowData[j] != null && !rowData[j].toString().isEmpty()) {
-						isEmptyRow = false;
-					}
-				}
-
-				if (!isEmptyRow) {
-					dataList.add(rowData);
-				}
-			}
-
-			workbook.close();
-			return dataList.toArray(new Object[0][]);
 		}
+		workbook.close();
+		return data;
+	}
+	public static Object[][] readValidData(String path) throws IOException {
+		Object[][] allData = readAllData(path);
+		List<Object[]> validList = new ArrayList<>();
+
+		for (Object[] row : allData) {
+			String result = row[row.length - 1].toString();
+			if (result.equalsIgnoreCase("success")) {
+				Object[] trimmedRow = new Object[row.length - 1];
+				System.arraycopy(row, 0, trimmedRow, 0, row.length - 1);
+				validList.add(trimmedRow);
+			}
+		}
+		return validList.toArray(new Object[0][]);
 	}
 
-	private static Object getCellValue(Cell cell) {
-		switch (cell.getCellType()) {
-			case STRING:
-				return cell.getStringCellValue().trim();
-			case NUMERIC:
-				return cell.getNumericCellValue();
-			case BOOLEAN:
-				return cell.getBooleanCellValue();
-			case BLANK:
-				return "";
-			default:
-				return null;
+
+	public static Object[][] readInvalidData(String path) throws IOException {
+		Object[][] allData = readAllData(path);
+		List<Object[]> invalidList = new ArrayList<>();
+
+		for (Object[] row : allData) {
+			String result = row[row.length - 1].toString();
+			if (!result.equalsIgnoreCase("success")) {
+				Object[] trimmedRow = new Object[row.length - 1];
+				System.arraycopy(row, 0, trimmedRow, 0, row.length - 1);
+				invalidList.add(trimmedRow);
+			}
 		}
+		return invalidList.toArray(new Object[0][]);
 	}
+
 }

@@ -21,25 +21,30 @@ public class RegisterPage extends BasePage {
 	public void register(String username, String email, String password, String confirmPassword) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.visibilityOfElementLocated(usernameLocator)).sendKeys(username);
-		find(emailLocator).sendKeys(email);
-		find(passwordLocator).sendKeys(password);
-		find(confirmPasswordLocator).sendKeys(confirmPassword);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(emailLocator)).sendKeys(email);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(passwordLocator)).sendKeys(password);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(confirmPasswordLocator)).sendKeys(confirmPassword);
 		wait.until(ExpectedConditions.elementToBeClickable(submitBtnLocator)).click();
 	}
-
 	public String getAlertText() {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		try {
-			return find(alertLocator).getText();
-		} catch (NoSuchElementException e) {
+			WebElement alert = wait.until(ExpectedConditions.visibilityOfElementLocated(alertLocator));
+			return alert.getText();
+		} catch (Exception e) {
 			return "";
 		}
 	}
 
 	public boolean isAlertVisible() {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		try {
-			return find(alertLocator).isDisplayed();
-		} catch (NoSuchElementException e) {
+			wait.until(ExpectedConditions.visibilityOfElementLocated(alertLocator));
+			return true;
+		} catch (Exception e) {
 			return false;
 		}
 	}
+
+
 }

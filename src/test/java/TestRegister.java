@@ -1,11 +1,16 @@
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.*;
-import java.io.IOException;  // THIS IS THE MISSING IMPORT
-import static org.testng.Assert.*;
-import org.example.ParseExcel; // Add this import at the top
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+
 public class TestRegister {
+	private final String BASE_URL = "https://url-shortening-production-6c83.up.railway.app/signup";
 	private WebDriver driver;
 
 	@BeforeMethod
@@ -13,32 +18,31 @@ public class TestRegister {
 		WebDriverManager.chromedriver().setup();
 		driver = new ChromeDriver();
 		driver.manage().window().maximize();
+		driver.get(BASE_URL);
+
 	}
+
 
 	@AfterMethod
 	public void tearDown() {
-		if (driver != null) {
-			driver.quit();
-		}
+
+		driver.quit();
+
 	}
 
-	@DataProvider(name = "excelData")
+	@DataProvider(name = "validRegisterData")
 	public Object[][] getExcelData() throws IOException {
-		return ParseExcel.readData("testdata.xlsx");
+		String filePath = System.getProperty("user.dir") + "/src/test/resources/testData.xlsx";
+		return ParseExcel.readValidData(filePath);
 	}
 
-	@Test(dataProvider = "excelData")
-	public void testRegistration(String username, String email, String password,
-								 String confirmPassword, String expectedResult) {
+	@Test(dataProvider = "validRegisterData")
+	public void testValidRegistration(String username, String email, String password,
+	                                  String confirmPassword) {
 		RegisterPage registerPage = new RegisterPage(driver);
-		driver.get("https://url-shortening-production-6c83.up.railway.app/signup");
-
 		registerPage.register(username, email, password, confirmPassword);
+		Assert.assertTrue(registerPage.isAlertVisible(), "The alert is not displayed");
+		Assert.assertTrue(registerPage.getAlertText().contains("Success"), "Unexpected message in the alert :" + registerPage.getAlertText());
 
-		if (expectedResult.contains("Success")) {
-			assertTrue(registerPage.isAlertVisible());
-		} else {
-			assertTrue(registerPage.getAlertText().contains("Error"));
-		}
 	}
 }
