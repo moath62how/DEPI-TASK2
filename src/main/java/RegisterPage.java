@@ -20,7 +20,12 @@ public class RegisterPage extends BasePage {
 	public RegisterPage(WebDriver driver) {
 		super(driver);
 	}
-
+	public String getAlertText(){
+		return alert.getText();
+	}
+	public boolean isAlertVisible(){
+		return alert.isDisplayed();
+	}
 	public void register(String username, String password, String confirmPassword, String email) {
 		usernameField.sendKeys(username);
 		passwordField.sendKeys(password);
