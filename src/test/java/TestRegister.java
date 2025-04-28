@@ -6,6 +6,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.io.IOException;
 
@@ -31,10 +32,18 @@ public class TestRegister {
 	}
 
 	@DataProvider(name = "validRegisterData")
-	public Object[][] getExcelData() throws IOException {
+	public Object[][] getValidExcelData() throws IOException {
 		String filePath = System.getProperty("user.dir") + "/src/test/resources/testData.xlsx";
 		return ParseExcel.readValidData(filePath);
 	}
+
+	@DataProvider(name = "invalidRegisterData")
+	public Object[][] getInvalidExcelData() throws IOException {
+		String filePath = System.getProperty("user.dir") + "/src/test/resources/testData.xlsx";
+		return ParseExcel.readInvalidData(filePath);
+	}
+
+
 
 	@Test(dataProvider = "validRegisterData")
 	public void testValidRegistration(String username, String email, String password,
@@ -44,5 +53,14 @@ public class TestRegister {
 		Assert.assertTrue(registerPage.isAlertVisible(), "The alert is not displayed");
 		Assert.assertTrue(registerPage.getAlertText().contains("Success"), "Unexpected message in the alert :" + registerPage.getAlertText());
 
+	}
+
+	@Test(dataProvider = "invalidRegisterData")
+	public void testInvalidRegister(String username, String email, String password, String confirmPassword) {
+		RegisterPage registerPage = new RegisterPage(driver);
+		SoftAssert softAssert = new SoftAssert();
+		registerPage.register(username, email, password, confirmPassword);
+		softAssert.assertTrue(registerPage.isAlertVisible());
+		Assert.assertEquals(driver.getCurrentUrl(), BASE_URL);
 	}
 }

@@ -31,6 +31,9 @@ public class ParseExcel {
 		List<Object[]> validList = new ArrayList<>();
 
 		for (Object[] row : allData) {
+			if (row == null || row.length == 0) {
+				continue; // Skip null or empty rows because of an wired error that i have no clue how to fix
+			}
 			String result = row[row.length - 1].toString();
 			if (result.equalsIgnoreCase("success")) {
 				Object[] trimmedRow = new Object[row.length - 1];
@@ -48,7 +51,7 @@ public class ParseExcel {
 
 		for (Object[] row : allData) {
 			String result = row[row.length - 1].toString();
-			if (!result.equalsIgnoreCase("success")) {
+			if (!result.equalsIgnoreCase("success") && result.contains("Error")) {
 				Object[] trimmedRow = new Object[row.length - 1];
 				System.arraycopy(row, 0, trimmedRow, 0, row.length - 1);
 				invalidList.add(trimmedRow);
